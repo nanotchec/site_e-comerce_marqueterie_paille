@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================================================
+// Models
+// ==============================================================================
+
+model User {
+  id            String    @id @default(uuid()) @db.Char(36)
+  email         String    @unique
+  name          String?
+  password      String
+  role          UserRole  @default(PRODUCT_EDITOR)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orders        Order[]
+}
+
+enum UserRole {
+  ADMIN
+  PRODUCT_EDITOR
+  ANALYST
+}
+
+model Product {
+  id               String           @id @default(uuid())
+  name             String
+  slug             String           @unique
+  description      String           @db.Text
+  price            Float
+  stock            Int
+  images           ProductImage[]
+  category         Category?        @relation(fields: [categoryId], references: [id])
+  categoryId       String?
+  shippingMethods  ShippingMethod[] @relation("ProductShippingMethods")
+  OrderLineItem    OrderLineItem[]
+  realisation      Realisation?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  products    Product[]
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  parentId    String?
+  children    Category[] @relation("CategoryHierarchy")
+}
+
+model ProductImage {
+  id            String   @id @default(uuid()) @db.Char(36)
+  url           String
+  altText       String?
+  isThumbnail   Boolean  @default(false)
+  productId     String   @db.Char(36)
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Order {
+  id              String          @id @default(uuid()) @db.Char(36)
+  userId          String          @db.Char(36)
+  user            User            @relation(fields: [userId], references: [id])
+  status          OrderStatus     @default(PENDING)
+  total           Float
+  stripeSessionId String?         @unique
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  lineItems       OrderLineItem[]
+  shippingAddress ShippingAddress?
+  shippingMethod  ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
+  shippingMethodId String?        @db.Char(36)
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model OrderLineItem {
+  id        String  @id @default(uuid()) @db.Char(36)
+  orderId   String  @db.Char(36)
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String  @db.Char(36)
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model ShippingAddress {
+  id        String  @id @default(uuid()) @db.Char(36)
+  orderId   String  @unique @db.Char(36)
+  order     Order   @relation(fields: [orderId], references: [id])
+  firstName String
+  lastName  String
+  address1  String
+  address2  String?
+  city      String
+  postalCode String
+  country   String
+}
+
+model ShippingMethod {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  products    Product[] @relation("ProductShippingMethods")
+  orders      Order[]
+}
+
+model Realisation {
+  id          String   @id @default(uuid()) @db.Char(36)
+  title       String
+  description String   @db.Text
+  year        Int
+  isFavorite  Boolean  @default(false)
+  isInSale    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  images      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?  @unique
+}
+
+model Setting {
+  id        String   @id @default(uuid()) @db.Char(36)
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
