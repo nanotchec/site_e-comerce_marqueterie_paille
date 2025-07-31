@@ -4,7 +4,9 @@ Ce projet est la construction d'une plateforme e-commerce complète et haut de g
 
 Le site se compose de deux parties principales : une boutique en ligne élégante et intuitive pour les clients, et un panel d'administration puissant et sécurisé pour la gestion complète de l'activité.
 
-**(placeholder : Insérer ici un GIF animé ou une capture d'écran montrant la navigation sur la page d'accueil et une page produit)**
+![démo front](demo/demofront.gif)
+
+![démo back](demo/demoback.gif)
 
 ---
 
