@@ -96,7 +96,7 @@ graph TD
 | **Base de données** | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)                                          |
 | **ORM**         | ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)                                       |
 | **Auth**        | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)                                      |
-| **Déploiement**   | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)                                        |
+| **Déploiement**   | ![OVH](https://img.shields.io/badge/OVH-123F6B?style=for-the-badge&logo=ovh&logoColor=white)                                        |
 
 ---
 
@@ -117,10 +117,12 @@ Pour lancer le projet en local, suivez ces étapes :
 
 3.  **Configurez les variables d'environnement :**
     - Copiez le fichier `.env.example` et renommez-le en `.env`.
-    - Remplissez les informations nécessaires, notamment l'URL de votre base de données MySQL.
+    - Remplissez les informations nécessaires, notamment l'URL de votre base de données MySQL et vos clés d'API.
     ```
+    # .env
     DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
     JWT_SECRET="votre_secret_jwt_ici"
+    # ... et les autres clés
     ```
 
 4.  **Synchronisez la base de données :**
