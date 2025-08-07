@@ -14,7 +14,7 @@ export default function NewRealisationPage() {
     const [description, setDescription] = useState('');
     const [year, setYear] = useState<number | ''>('');
     const [isFavorite, setIsFavorite] = useState(false);
-    const [isForSale, setIsForSale] = useState(false);
+    const [isInSale, setIsInSale] = useState(false);
     const [imageUrl, setImageUrl] = useState(''); // Placeholder for upload logic
     const [products, setProducts] = useState<Product[]>([]);
     const [productId, setProductId] = useState<string | null>(null);
@@ -24,8 +24,8 @@ export default function NewRealisationPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Fetch products if 'isForSale' is checked
-        if (isForSale) {
+        // Fetch products if 'isInSale' is checked
+        if (isInSale) {
             const fetchProducts = async () => {
                 // Placeholder for fetching products from API
                 const placeholderProducts = [
@@ -36,7 +36,7 @@ export default function NewRealisationPage() {
             };
             fetchProducts();
         }
-    }, [isForSale]);
+    }, [isInSale]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,10 +54,10 @@ export default function NewRealisationPage() {
                     title, 
                     description, 
                     year, 
-                    isFavorite, 
-                    isForSale, 
+                    isFavorite,
+                    isInSale,
                     imageUrl: uploadedImageUrl,
-                    productId: isForSale ? productId : null 
+                    productId: isInSale ? productId : null 
                 }),
             });
 
@@ -163,22 +163,22 @@ export default function NewRealisationPage() {
                                 <div className="relative flex gap-x-3">
                                     <div className="flex h-6 items-center">
                                         <input
-                                        id="isForSale"
-                                        name="isForSale"
+                                        id="isInSale"
+                                        name="isInSale"
                                         type="checkbox"
-                                        checked={isForSale}
-                                        onChange={(e) => setIsForSale(e.target.checked)}
+                                        checked={isInSale}
+                                        onChange={(e) => setIsInSale(e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                                         />
                                     </div>
                                     <div className="text-sm leading-6">
-                                        <label htmlFor="isForSale" className="font-medium text-gray-900">
+                                        <label htmlFor="isInSale" className="font-medium text-gray-900">
                                             Marquer comme "En vente"
                                         </label>
                                         <p className="text-gray-500">La réalisation sera liée à un produit de la boutique.</p>
                                     </div>
                                 </div>
-                                {isForSale && (
+                                {isInSale && (
                                     <div className="sm:col-span-4">
                                         <label htmlFor="product-link" className="block text-sm font-medium leading-6 text-gray-900">
                                             Lier à un produit existant

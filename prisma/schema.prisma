@@ -75,16 +75,18 @@ model ProductImage {
 
 model Order {
   id              String          @id @default(uuid()) @db.Char(36)
-  userId          String          @db.Char(36)
-  user            User            @relation(fields: [userId], references: [id])
+  userId          String?         @db.Char(36)
+  user            User?           @relation(fields: [userId], references: [id])
   status          OrderStatus     @default(PENDING)
   total           Float
   stripeSessionId String?         @unique
+  customerEmail   String?
+  customerName    String?
+  shippingAddress Json?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
   lineItems       OrderLineItem[]
-  shippingAddress ShippingAddress?
   shippingMethod  ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
   shippingMethodId String?        @db.Char(36)
 
@@ -93,6 +95,7 @@ model Order {
 
 enum OrderStatus {
   PENDING
+  PAID
   PROCESSING
   SHIPPED
   DELIVERED
@@ -113,18 +116,7 @@ model OrderLineItem {
   @@index([productId])
 }
 
-model ShippingAddress {
-  id        String  @id @default(uuid()) @db.Char(36)
-  orderId   String  @unique @db.Char(36)
-  order     Order   @relation(fields: [orderId], references: [id])
-  firstName String
-  lastName  String
-  address1  String
-  address2  String?
-  city      String
-  postalCode String
-  country   String
-}
+
 
 model ShippingMethod {
   id          String    @id @default(uuid())

@@ -15,71 +15,64 @@ async function verifyJWT(token: string, secret: Uint8Array): Promise<any> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
-  const publicPaths = [
-    '/admin/login',
-    '/api/auth/login',
-  ];
-
-  // Allow requests for non-admin API routes, static files, and image optimization
-  if (
-    !pathname.startsWith('/admin') && 
-    !pathname.startsWith('/api/admin')
-  ) {
-    if (
-        pathname.startsWith('/api/') ||
-        pathname.startsWith('/_next/') ||
-        pathname.includes('.') // for favicon.ico, etc.
-    ) {
-      return NextResponse.next();
-    }
-  }
-
-  const isPublicPath = publicPaths.some(p => pathname.startsWith(p));
+  const publicPaths = ['/admin/login', '/api/auth/login'];
+  const isApiAdmin = pathname.startsWith('/api/admin');
+  const isAdminPage = pathname.startsWith('/admin');
+  const isPublicAdminPage = publicPaths.some((p) => pathname.startsWith(p));
 
   const authToken = req.cookies.get('auth-token')?.value;
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!jwtSecret) {
     console.error('CRITICAL: JWT_SECRET is not set.');
-    // In a real app, you might want to redirect to an error page
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 
   const secret = new TextEncoder().encode(jwtSecret);
 
-  if (pathname.startsWith('/admin') && !isPublicPath) {
+  // Protect admin API routes with JSON responses
+  if (isApiAdmin) {
     if (!authToken) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/admin/login';
-      return NextResponse.redirect(url);
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
     const decoded = await verifyJWT(authToken, secret);
-
     if (!decoded) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/admin/login';
-       // Clear the invalid cookie
-      const response = NextResponse.redirect(url);
+      const response = NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       response.cookies.delete('auth-token');
       return response;
     }
+    return NextResponse.next();
   }
 
-  // If trying to access login page while already logged in
-  if (isPublicPath && authToken) {
+  // Protect admin pages with redirects
+  if (isAdminPage) {
+    if (!isPublicAdminPage) {
+      if (!authToken) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/admin/login';
+        return NextResponse.redirect(url);
+      }
+      const decoded = await verifyJWT(authToken, secret);
+      if (!decoded) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/admin/login';
+        const response = NextResponse.redirect(url);
+        response.cookies.delete('auth-token');
+        return response;
+      }
+    } else if (authToken) {
       const decoded = await verifyJWT(authToken, secret);
       if (decoded) {
-          const url = req.nextUrl.clone();
-          url.pathname = '/admin/dashboard';
-          return NextResponse.redirect(url);
+        const url = req.nextUrl.clone();
+        url.pathname = '/admin/dashboard';
+        return NextResponse.redirect(url);
       }
+    }
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  // Match all paths except for the ones starting with /api, /_next/static, /_next/image, and favicon.ico
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-}; 
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
+};

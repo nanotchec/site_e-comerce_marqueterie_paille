@@ -4,11 +4,25 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
     try {
         const data = await req.json();
-        const { title, description, year, isFavorite, isForSale, imageUrl, productId } = data;
+        const {
+            title,
+            description,
+            year,
+            isFavorite,
+            isForSale, // backward-compat key from older UI
+            isInSale: isInSaleBody, // preferred key matching Prisma schema
+            imageUrl, // backward-compat single image
+            images,   // preferred JSON payload matching Prisma schema
+            productId,
+        } = data;
 
-        if (!title || !description || !year || !imageUrl) {
+        if (!title || !description || !year) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
+
+        // Resolve booleans and images payload to match Prisma schema
+        const isInSale = typeof isInSaleBody === 'boolean' ? isInSaleBody : !!isForSale;
+        const imagesPayload = images !== undefined ? images : (imageUrl ? [{ url: imageUrl }] : null);
 
         const realisation = await prisma.realisation.create({
             data: {
@@ -16,9 +30,9 @@ export async function POST(req: Request) {
                 description,
                 year: parseInt(year, 10),
                 isFavorite: isFavorite || false,
-                isForSale: isForSale || false,
-                imageUrl,
-                productId: isForSale ? productId : null,
+                isInSale,
+                images: imagesPayload,
+                productId: isInSale ? productId : null,
             },
         });
 

@@ -10,8 +10,8 @@ interface Realisation {
   year: number;
   description: string;
   isFavorite: boolean;
-  isForSale: boolean;
-  imageUrl: string;
+  isInSale: boolean;
+  images?: { url: string; alt?: string }[] | null;
 }
 
 export default function RealisationsPage() {
@@ -85,9 +85,13 @@ export default function RealisationsPage() {
                   {realisations.map((realisation) => (
                     <tr key={realisation.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                         <div className="flex items-center">
+                          <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0">
-                                <img className="h-10 w-10 rounded-full object-cover" src={realisation.imageUrl} alt={realisation.title} />
+                                <img
+                                  className="h-10 w-10 rounded-full object-cover"
+                                  src={realisation.images?.[0]?.url || '/images/placeholder.jpg'}
+                                  alt={realisation.title}
+                                />
                             </div>
                             <div className="ml-4">
                                 <div className="font-medium text-gray-900">{realisation.title}</div>
@@ -103,7 +107,7 @@ export default function RealisationsPage() {
                                     Favori
                                 </span>
                             )}
-                             {realisation.isForSale && (
+                              {realisation.isInSale && (
                                 <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                                     En vente
                                 </span>

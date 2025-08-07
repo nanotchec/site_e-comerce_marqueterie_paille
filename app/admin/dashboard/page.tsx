@@ -1,8 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-
 const stats = [
   { name: 'Total Revenue', stat: '€405,091.00', previousStat: '€320,540.00', change: '12.32%', changeType: 'increase' },
   { name: 'New Orders', stat: '1,204', previousStat: '1,120', change: '4.57%', changeType: 'increase' },
@@ -15,14 +12,6 @@ function classNames(...classes: string[]) {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      router.push('/admin/login');
-    }
-  }, [router]);
 
   // Placeholder functions for real data fetching
   const getLowStockProducts = () => [

@@ -1,7 +1,7 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: 'https://www.france-pascale.fr', // Remplacer par l'URL réelle
-  generateRobotsRxt: true,
+  generateRobotsTxt: true,
   generateIndexSitemap: false,
   exclude: ['/api/*', '/admin/*'],
   robotsTxtOptions: {
